@@ -1,5 +1,17 @@
 {
     "require-dev": {
         "kornrunner/dbunit": "^4.1"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
     }
 }
