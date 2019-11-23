@@ -14,3 +14,4 @@ Icon
 Icon?
 *.swp
 *.phpunit.result.cache
+vendor/

@@ -1,0 +1,5 @@
+{
+    "require-dev": {
+        "kornrunner/dbunit": "^4.1"
+    }
+}
