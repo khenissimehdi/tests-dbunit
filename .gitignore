@@ -5,6 +5,8 @@
 
 *.DS_Store
 *.idea
+.idea/
+idea/
 *.log
 *.aux
 *.synctex.gz
