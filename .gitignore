@@ -14,5 +14,6 @@ Icon%0D
 Icon
 Icon?
 *.swp
+*.php_cs.cache
 *.phpunit.result.cache
 vendor/
