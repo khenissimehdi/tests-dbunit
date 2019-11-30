@@ -2,6 +2,10 @@
 
 namespace DB;
 
+
+use Exception;
+use PDO;
+
 /**
  * Classe permettant de retourner une instance unique de PDO
  * afin de ne pas multiplier les connexions au serveur de base de données.
