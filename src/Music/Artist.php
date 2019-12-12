@@ -2,70 +2,73 @@
 
 namespace Music;
 
+use DB\MyPDO;
+use Exception;
+use PDO;
+
 /**
  * Class Artist.
  */
 class Artist extends Entity
 {
-    /**
-     * @return static
-     */
-    public static function createFromId(int $identifier): self
+
+
+    public static function createFromId(int $artistId): self
     {
-        $reqArtist = MyPDO::getInstance()->prepare('SELECT * FROM artist WHERE id=?;');
-        $reqArtist->execute([$identifier]);
-        $reqArtist->setFetchMode(PDO::FETCH_CLASS, 'Artist');
-        if (false !== ($object = $reqArtist->fetch())) {
+        $stmt = MyPDO::getInstance()->prepare(<<<SQL
+            SELECT id, name
+            FROM artist
+            WHERE id = ?
+SQL
+        );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, self::class);
+        $stmt->execute([$artistId]);
+        if (false !== ($object = $stmt->fetch())) {
             return $object;
         }
+        throw new Exception('Artist not found');
     }
 
-    /**
-     * @return array
-     */
+
     public static function getAll(): array
     {
-        $reqArtists = MyPDO::getInstance()->prepare('SELECT * FROM artist ORDER BY name;');
-        $reqArtists->execute();
-        $reqArtists->setFetchMode(PDO::FETCH_CLASS, 'Artist');
-        $list = [];
-        while (false !== ($object = $reqArtists->fetch())) {
-            $list[] = $object;
-        }
+        $stmt = MyPDO::getInstance()->prepare(<<<SQL
+            SELECT *
+            FROM artist
+            ORDER BY name
+SQL
+        );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, self::class);
+        $stmt->execute();
 
-        return $list;
+        return $stmt->fetchAll();
     }
 
-    /**
-     * @return array
-     */
+
     public function getAlbums(): array
     {
-        $reqAlbums = MyPDO::getInstance()->prepare('SELECT * FROM album WHERE artistId=? ORDER BY year;');
-        $reqAlbums->execute([$this->id]);
-        $reqAlbums->setFetchMode(PDO::FETCH_CLASS, 'Album');
-        $table = [];
-        while (false !== ($row = $reqAlbums->fetch())) {
-            $table[] = $row;
-        }
-
-        return $table;
+        return Album::getFromArtistId($this->getId());
     }
 
-    /**
-     * @param int $genreId
-     * @return array
-     */
-    public function getFromGenreId(int $genreId): array
+
+    public static function getFromGenreId(int $genreId): array
     {
-        $reqArtists = MyPDO::getInstance()->prepare('SELECT * FROM artist a,album al where a.id=al.artistId and al.genreId=? ORDER BY name;');
-        $reqArtists->execute([$genreId]);
-        $reqArtists->setFetchMode(PDO::FETCH_CLASS, 'Artist');
-        $list = [];
-        while (false !== ($object = $reqArtists->fetch())) {
-            $list[] = $object;
-        }
+        $stmt = MyPDO::getInstance()->prepare(<<<SQL
+            SELECT DISTINCT *
+            FROM artist
+            WHERE id IN (
+                SELECT artistId
+                FROM album
+                WHERE genreId = ?
+            )
+            ORDER BY name
+SQL
+        );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, self::class);
+        $stmt->execute([$genreId]);
 
-        return $list;
+        return $stmt->fetchAll();
     }
+
+
 }

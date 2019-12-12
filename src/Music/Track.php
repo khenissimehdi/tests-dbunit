@@ -2,99 +2,96 @@
 
 namespace Music;
 
+use DB\MyPDO;
+use PDO;
+use Exception;
+
 /**
  * Class Track.
  */
 class Track
 {
-    private $albumId;
-    private $songId;
-    private $number;
-    private $diskNumber;
-    private $duration;
 
-    /**
-     * @return mixed
-     */
-    public function getDuration()
+
+    protected $albumId = null;
+    protected $songId = null;
+    protected $number = null;
+    protected $disknumber = null;
+    protected $duration = null;
+
+
+    public function getDuration(): int
     {
-        return $this->duration;
+        return (int) $this->duration;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getAlbumId()
+    public function getFormattedDuration(): string
     {
-        return $this->albumId;
+        $min = floor($this->getDuration() / 60);
+        $sec = $this->getDuration() % 60;
+        if ($min < 10) {
+            $min = "0$min";
+        }
+        if ($sec < 10) {
+            $sec = "0$sec";
+        }
+
+        return "$min:$sec";
     }
 
-    /**
-     * @return string
-     */
-    public function getFormattedDuration()
-    {
-        $seconds = $this->duration % 60;
-        $minutes = (int) ($this->duration / 60);
-        $seconds < 10 ? $calcSeconds = '0'.$seconds : $calcSeconds = $seconds;
-        $minutes < 10 ? $calcMinutes = '0'.$minutes : $calcMinutes = $minutes;
 
-        return $calcMinutes.':'.$calcSeconds;
-    }
-
-    /**
-     * @return int
-     */
     public function getNumber(): int
     {
-        return $this->number;
+        return (int) $this->number;
+    }
+
+
+    public function getDiskNumber(): int
+    {
+        return (int) $this->disknumber;
     }
 
     public function getFormattedNumber(): string
     {
-        return $this->number + 100 * $this->diskNumber;
+        $number = $this->getNumber() + 100 * $this->disknumber;
+
+        return $number < 10 ? "0{$number}" : $number;
     }
 
-    /**
-     * @return Song
-     */
-    public function getSong(): Song
+    public function getAlbumId(): int
     {
-        $reqSong = MyPDO::getInstance()->prepare('SELECT * FROM song WHERE id=?;');
-        $reqSong->execute([$this->songId]);
-        $reqSong->setFetchMode(PDO::FETCH_CLASS, 'Song');
-        if (false !== ($object = $reqSong->fetch())) {
-            return $object;
-        }
+        return (int) $this->albumId;
     }
 
-    /**
-     * @return Album
-     */
+    public function getSongId(): int
+    {
+        return (int) $this->songId;
+    }
+
     public function getAlbum(): Album
     {
-        $reqAlbum = MyPDO::getInstance()->prepare('SELECT * FROM album WHERE id=?;');
-        $reqAlbum->execute([$this->albumId]);
-        $reqAlbum->setFetchMode(PDO::FETCH_CLASS, 'Album');
-        if (false !== ($object = $reqAlbum->fetch())) {
-            return $object;
-        }
+        return Album::createFromId($this->getAlbumId());
     }
 
-    /**
-     * @param int $albumId
-     * @return array
-     */
+    public function getSong(): Song
+    {
+        return Song::createFromId($this->getSongId());
+    }
+
     public static function getFromAlbumId(int $albumId): array
     {
-        $reqTrack = MyPDO::getInstance()->prepare('SELECT * FROM track WHERE albumId=? ORDER BY diskNumber,number;');
-        $reqTrack->execute([$albumId]);
-        $reqTrack->setFetchMode(PDO::FETCH_CLASS, 'Track');
-        $list = [];
-        while (false !== ($object = $reqTrack->fetch())) {
-            $list[] = $object;
-        }
+        $stmt = MyPDO::getInstance()->prepare(<<<SQL
+            SELECT *
+            FROM track
+            WHERE albumId = ?
+            ORDER BY disknumber, number
+SQL
+        );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, self::class);
+        $stmt->execute([$albumId]);
 
-        return $list;
+        return $stmt->fetchAll();
     }
+
+
 }

@@ -6,23 +6,20 @@ use DB\MyPDO;
 use Exception;
 use PHPUnit\DbUnit\Database\Connection;
 use PHPUnit\DbUnit\DataSet\FlatXmlDataSet;
+use PHPUnit\DbUnit\Database\DefaultConnection;
+use PHPUnit\DbUnit\DataSet\IDataSet;
 use PHPUnit\DbUnit\TestCase;
 
-/**
- * Class DatabaseTest.
- */
-class DatabaseTest extends TestCase
+
+abstract class DatabaseTest extends TestCase
 {
+
+
     private static $connection = null;
     private static $dataset = null;
 
-    /**
-     * Returns the test database connection.
-     *
-     * @return Connection
-     * @throws Exception
-     */
-    protected function getConnection()
+
+    public function getConnection()
     {
         if (null == self::$connection) {
             MyPDO::setConfiguration('sqlite::memory:');
@@ -35,12 +32,7 @@ class DatabaseTest extends TestCase
         return self::$connection;
     }
 
-    /**
-     * Returns the test dataset.
-     *
-     * @return FlatXmlDataSet
-     */
-    protected function getDataSet()
+    public function getDataSet(): IDataSet
     {
         if (null == self::$dataset) {
             self::$dataset = $this->createFlatXMLDataSet(dirname(__FILE__).'/database/dataset.xml');
@@ -48,4 +40,6 @@ class DatabaseTest extends TestCase
 
         return self::$dataset;
     }
+
+
 }

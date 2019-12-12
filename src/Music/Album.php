@@ -2,110 +2,97 @@
 
 namespace Music;
 
+use DB\MyPDO;
+use Exception;
+use PDO;
+
 /**
  * Class Album.
  */
 class Album extends Entity
 {
 
-    protected $year;
-    protected $genreId;
-    protected $artistId;
-    protected $coverId;
 
-    /**
-     * @return mixed
-     */
-    public function getYear()
-    {
-        return $this->year;
-    }
+    protected $year = NULL;
+    protected $genreId = NULL;
+    protected $artistId = NULL;
+    protected $coverId = NULL;
 
-    /**
-     * @return mixed
-     */
-    public function getGenreId()
-    {
-        return $this->genreId;
-    }
 
-    /**
-     * @return mixed
-     */
-    public function getCoverId()
+    public static function createFromId(int $albumId): self
     {
-        return $this->coverId;
-    }
-
-    /**
-     * @return static
-     */
-    public static function createFromId(int $identifier): self
-    {
-        $reqAlbum = MyPDO::getInstance()->prepare('SELECT * FROM album WHERE id=?;');
-        $reqAlbum->execute([$identifier]);
-        $reqAlbum->setFetchMode(PDO::FETCH_CLASS, 'Album');
-        if (false !== ($object = $reqAlbum->fetch())) {
-            return $object;
+        $stmt = MyPDO::getInstance()->prepare(<<<SQL
+            SELECT id, name, year, genreId, artistId, coverId
+            FROM album
+            WHERE id = ?
+SQL
+        );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, self::class);
+        $stmt->execute([$albumId]);
+        if (false !== ($obj = $stmt->fetch())) {
+            return $obj;
         }
+        throw new Exception('Album introuvable');
     }
 
-    /**
-     * @param int $artistId
-     * @return array
-     */
-    public static function getFromArtistId(int $artistId): array
+
+    public function getYear(): int
     {
-        $reqAlbums = MyPDO::getInstance()->prepare('SELECT * FROM album WHERE artistId=? ORDER BY year;');
-        $reqAlbums->execute([$artistId]);
-        $reqAlbums->setFetchMode(PDO::FETCH_CLASS, 'Album');
-        $table = [];
-        while (false !== ($row = $reqAlbums->fetch())) {
-            $table[] = $row;
-        }
-
-        return $table;
+        return (int) $this->year;
     }
 
-    /**
-     * @return array
-     */
-    public function getTracks(): array
+
+    public function getArtistId(): int
     {
-        $reqTrack = MyPDO::getInstance()->prepare('SELECT * FROM track WHERE albumId=? ORDER BY disknumber,number;');
-        $reqTrack->execute([$this->id]);
-        $reqTrack->setFetchMode(PDO::FETCH_CLASS, 'Track');
-        $list = [];
-        while (false !== ($object = $reqTrack->fetch())) {
-            $list[] = $object;
-        }
-
-        return $list;
+        return (int) $this->artistId;
     }
 
-    /**
-     * @return Artist
-     */
+
     public function getArtist(): Artist
     {
-        $reqAlbum = MyPDO::getInstance()->prepare('SELECT * FROM artist WHERE id=?;');
-        $reqAlbum->execute([$this->artistId]);
-        $reqAlbum->setFetchMode(PDO::FETCH_CLASS, 'Artist');
-        if (false !== ($object = $reqAlbum->fetch())) {
-            return $object;
-        }
+        return Artist::createFromId($this->getArtistId());
     }
 
-    /**
-     * @return Cover
-     */
+
+    public function getCoverId(): int
+    {
+        return (int) $this->coverId;
+    }
+
+
+    public static function getFromArtistId(int $artistId): array
+    {
+        $stmt = MyPDO::getInstance()->prepare(<<<SQL
+            SELECT *
+            FROM album
+            WHERE artistId = ?
+            ORDER BY year, name
+SQL
+        );
+        $stmt->setFetchMode(PDO::FETCH_CLASS, self::class);
+        $stmt->execute([$artistId]);
+
+        return $stmt->fetchAll();
+    }
+
+
+    public function getTracks(): array
+    {
+        return Track::getFromAlbumId($this->getId());
+    }
+
+
     public function getCover(): Cover
     {
-        $reqCover = MyPDO::getInstance()->prepare('SELECT * FROM cover WHERE id=?;');
-        $reqCover > execute([$this->coverId]);
-        $reqCover->setFetchMode(PDO::FETCH_CLASS, 'Cover');
-        if (false !== ($object = $reqCover->fetch())) {
-            return $object;
-        }
+        return Cover::createFromId($this->getCoverId());
     }
+
+
+    public function getGenreId(): int
+    {
+        return (int) $this->genreId;
+    }
+
+
 }
+

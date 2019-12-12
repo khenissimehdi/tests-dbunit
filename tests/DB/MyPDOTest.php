@@ -20,7 +20,7 @@ class MyPDOTest extends TestCase
     public function testConfiguration()
     {
         MyPDO::setConfiguration('sqlite::memory');
-        $this->assertThat(MyPDO::getInstance(), $this->isInstanceOf(PDO::class));
+        $this->assertInstanceOf(PDO::class, MyPDO::getInstance());
     }
 
     /**

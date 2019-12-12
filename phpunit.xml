@@ -19,7 +19,8 @@
 
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
+            <directory suffix=".php">src/DB</directory>
+            <directory suffix=".php">src/Music</directory>
         </whitelist>
     </filter>
 </phpunit>
