@@ -11,6 +11,15 @@ class TestTrack extends DatabaseTest
 {
 
 
+    public function testGetNumberWithDisks()
+    {
+        $number = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '201', '202', '203', '204', '205', '206'];
+        $tracks = Track::getFromAlbumId(407);
+        foreach ($tracks as $index => $track) {
+            $this->assertSame($number[$index], $track->getFormattedNumber());
+        }
+    }
+
     public function testGetFromAlbumId()
     {
         $data = new CsvDataSet();
@@ -29,30 +38,26 @@ class TestTrack extends DatabaseTest
         }
     }
 
-    public function testGetDurationAndGetFormattedDuration()
+    public function testGetSong()
     {
-        $duration = [
-            ['duration' => 302, 'formatted' => '05:02'],
-            ['duration' => 256, 'formatted' => '04:16'],
-            ['duration' => 301, 'formatted' => '05:01'],
-            ['duration' => 300, 'formatted' => '05:00'],
-            ['duration' => 331, 'formatted' => '05:31'],
-            ['duration' => 305, 'formatted' => '05:05'],
-            ['duration' => 383, 'formatted' => '06:23'],
-            ['duration' => 437, 'formatted' => '07:17'],
-            ['duration' => 310, 'formatted' => '05:10'],
-            ['duration' => 214, 'formatted' => '03:34'],
-            ['duration' => 334, 'formatted' => '05:34'],
-            ['duration' => 370, 'formatted' => '06:10'],
-            ['duration' => 361, 'formatted' => '06:01'],
-            ['duration' => 453, 'formatted' => '07:33'],
+        $expectedSong = [
+            ['id' => 42, 'name' => 'Blackened'],
+            ['id' => 381, 'name' => '...And Justice for All'],
+            ['id' => 837, 'name' => 'Eye of the Beholder'],
+            ['id' => 972, 'name' => 'One'],
+            ['id' => 1779, 'name' => 'The Shortest Straw'],
+            ['id' => 1591, 'name' => 'Harvester Of Sorrow'],
+            ['id' => 2448, 'name' => 'The Frayed Ends of Sanity'],
+            ['id' => 2797, 'name' => 'To Live Is to Die'],
+            ['id' => 2917, 'name' => 'Dyers Eve'],
         ];
-        $tracks = Track::getFromAlbumId(58);
-        $this->assertCount(count($duration), $tracks);
-        $this->assertContainsOnlyInstancesOf(Track::class, $tracks);
+        $tracks = Track::getFromAlbumId(43);
         foreach ($tracks as $index => $track) {
-            $this->assertSame($duration[$index]['duration'], $track->getDuration());
-            $this->assertSame($duration[$index]['formatted'], $track->getFormattedDuration());
+            $song = $track->getSong();
+            $this->assertInstanceOf(Song::class, $song);
+            $this->assertSame($expectedSong[$index]['id'], $track->getSongId());
+            $this->assertSame($expectedSong[$index]['id'], $song->getId());
+            $this->assertSame($expectedSong[$index]['name'], $song->getName());
         }
     }
 
@@ -82,35 +87,30 @@ class TestTrack extends DatabaseTest
         }
     }
 
-    public function testGetNumberWithDisks()
+    public function testGetDurationAndGetFormattedDuration()
     {
-        $number = ['101', '102', '103', '104', '105', '106', '107', '108', '109', '201', '202', '203', '204', '205', '206'];
-        $tracks = Track::getFromAlbumId(407);
-        foreach ($tracks as $index => $track) {
-            $this->assertSame($number[$index], $track->getFormattedNumber());
-        }
-    }
-
-    public function testGetSong()
-    {
-        $expectedSong = [
-            ['id' => 42, 'name' => 'Blackened'],
-            ['id' => 381, 'name' => '...And Justice for All'],
-            ['id' => 837, 'name' => 'Eye of the Beholder'],
-            ['id' => 972, 'name' => 'One'],
-            ['id' => 1779, 'name' => 'The Shortest Straw'],
-            ['id' => 1591, 'name' => 'Harvester Of Sorrow'],
-            ['id' => 2448, 'name' => 'The Frayed Ends of Sanity'],
-            ['id' => 2797, 'name' => 'To Live Is to Die'],
-            ['id' => 2917, 'name' => 'Dyers Eve'],
+        $duration = [
+            ['duration' => 302, 'formatted' => '05:02'],
+            ['duration' => 256, 'formatted' => '04:16'],
+            ['duration' => 301, 'formatted' => '05:01'],
+            ['duration' => 300, 'formatted' => '05:00'],
+            ['duration' => 331, 'formatted' => '05:31'],
+            ['duration' => 305, 'formatted' => '05:05'],
+            ['duration' => 383, 'formatted' => '06:23'],
+            ['duration' => 437, 'formatted' => '07:17'],
+            ['duration' => 310, 'formatted' => '05:10'],
+            ['duration' => 214, 'formatted' => '03:34'],
+            ['duration' => 334, 'formatted' => '05:34'],
+            ['duration' => 370, 'formatted' => '06:10'],
+            ['duration' => 361, 'formatted' => '06:01'],
+            ['duration' => 453, 'formatted' => '07:33'],
         ];
-        $tracks = Track::getFromAlbumId(43);
+        $tracks = Track::getFromAlbumId(58);
+        $this->assertCount(count($duration), $tracks);
+        $this->assertContainsOnlyInstancesOf(Track::class, $tracks);
         foreach ($tracks as $index => $track) {
-            $song = $track->getSong();
-            $this->assertInstanceOf(Song::class, $song);
-            $this->assertSame($expectedSong[$index]['id'], $track->getSongId());
-            $this->assertSame($expectedSong[$index]['id'], $song->getId());
-            $this->assertSame($expectedSong[$index]['name'], $song->getName());
+            $this->assertSame($duration[$index]['duration'], $track->getDuration());
+            $this->assertSame($duration[$index]['formatted'], $track->getFormattedDuration());
         }
     }
 

@@ -12,22 +12,26 @@ use PHPUnit\DbUnit\DataSet\YamlDataSet;
 class AlbumTest extends DatabaseTest
 {
 
-
-    public function testCreateFromId()
-    {
-        $album = Album::createFromId(43);
-        $this->assertInstanceOf(Album::class, $album);
-        $this->assertSame($album->getGenreId(), 4, 'Mauvais identifiant genre');
-        $this->assertSame($album->getCoverId(), 43, 'Mauvais identifiant album');
-        $this->assertSame($album->getYear(), 1988, 'Mauvaise année');
-        $this->assertSame($album->getName(), '...And Justice For All', 'Mauvais nom');
-        $this->assertSame($album->getId(), 43, 'Mauvais identifiant');
-    }
-
     public function testCreateFromIdThrowsExceptionIfIdIsNotFound()
     {
         $this->expectException(Exception::class);
         Album::createFromId(1000);
+    }
+
+    public function testGetTracks()
+    {
+        $mockAlbum = $this->createPartialMock(Album::class, ['getId']);
+        $mockAlbum->expects($this->once())->method('getId')->willReturn(43);
+        $this->assertEquals(Track::getFromAlbumId(43), $mockAlbum->getTracks());
+    }
+
+    public function testGetCover()
+    {
+        $mockAlbum = $this->createPartialMock(Album::class, ['getCoverId']);
+        $mockAlbum->expects($this->once())->method('getCoverId')->willReturn(43);
+        $cover = $mockAlbum->getCover();
+        $this->assertSame($cover->getId(), 43);
+        $this->assertInstanceOf(Cover::class, $cover);
     }
 
     public function testGetFromArtistId()
@@ -48,20 +52,15 @@ class AlbumTest extends DatabaseTest
         }
     }
 
-    public function testGetTracks()
+    public function testCreateFromId()
     {
-        $mockAlbum = $this->createPartialMock(Album::class, ['getId']);
-        $mockAlbum->expects($this->once())->method('getId')->willReturn(43);
-        $this->assertEquals(Track::getFromAlbumId(43), $mockAlbum->getTracks());
-    }
-
-    public function testGetCover()
-    {
-        $mockAlbum = $this->createPartialMock(Album::class, ['getCoverId']);
-        $mockAlbum->expects($this->once())->method('getCoverId')->willReturn(43);
-        $cover = $mockAlbum->getCover();
-        $this->assertSame($cover->getId(), 43);
-        $this->assertInstanceOf(Cover::class, $cover);
+        $album = Album::createFromId(43);
+        $this->assertInstanceOf(Album::class, $album);
+        $this->assertSame($album->getGenreId(), 4, 'Mauvais identifiant genre');
+        $this->assertSame($album->getCoverId(), 43, 'Mauvais identifiant album');
+        $this->assertSame($album->getYear(), 1988, 'Mauvaise année');
+        $this->assertSame($album->getName(), '...And Justice For All', 'Mauvais nom');
+        $this->assertSame($album->getId(), 43, 'Mauvais identifiant');
     }
 
 

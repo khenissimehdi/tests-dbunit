@@ -15,9 +15,18 @@ abstract class DatabaseTest extends TestCase
 {
 
 
-    private static $connection = null;
     private static $dataset = null;
+    private static $connection = null;
 
+
+    public function getDataSet(): IDataSet
+    {
+        if (null == self::$dataset) {
+            self::$dataset = $this->createFlatXMLDataSet(dirname(__FILE__).'/database/dataset.xml');
+        }
+
+        return self::$dataset;
+    }
 
     public function getConnection()
     {
@@ -30,15 +39,6 @@ abstract class DatabaseTest extends TestCase
         }
 
         return self::$connection;
-    }
-
-    public function getDataSet(): IDataSet
-    {
-        if (null == self::$dataset) {
-            self::$dataset = $this->createFlatXMLDataSet(dirname(__FILE__).'/database/dataset.xml');
-        }
-
-        return self::$dataset;
     }
 
 

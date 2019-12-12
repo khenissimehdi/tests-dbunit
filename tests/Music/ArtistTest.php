@@ -10,7 +10,6 @@ use Exception;
 class ArtistTest extends DatabaseTest
 {
 
-
     public function testCreateFromId()
     {
         $artist = Artist::createFromId(17);
@@ -23,6 +22,13 @@ class ArtistTest extends DatabaseTest
     {
         $this->expectException(Exception::class);
         Artist::createFromId(99999999999);
+    }
+
+    public function testGetAlbums()
+    {
+        $mockArtist = $this->createPartialMock(Artist::class, ['getId']);
+        $mockArtist->expects($this->once())->method('getId')->willReturn(17);
+        $this->assertEquals(Album::getFromArtistId(17), $mockArtist->getAlbums());
     }
 
     public function testGetAll()
@@ -40,13 +46,6 @@ class ArtistTest extends DatabaseTest
             $this->assertSame($expectedArtistsArray[$i]['id'], $artist->getId(), 'Mauvais identifiant');
             $this->assertSame($expectedArtistsArray[$i]['name'], $artist->getName(), 'Mauvais nom');
         }
-    }
-
-    public function testGetAlbums()
-    {
-        $mockArtist = $this->createPartialMock(Artist::class, ['getId']);
-        $mockArtist->expects($this->once())->method('getId')->willReturn(17);
-        $this->assertEquals(Album::getFromArtistId(17), $mockArtist->getAlbums());
     }
 
 
